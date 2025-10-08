@@ -152,3 +152,7 @@ tasks.named("check") {
     dependsOn tasks.named("pmdMain")
     dependsOn tasks.named("pmdTest")
 }
+
+tasks.named("test") {
+    finalizedBy jacocoTestReport
+}

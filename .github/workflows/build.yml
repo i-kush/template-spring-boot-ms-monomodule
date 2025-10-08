@@ -33,7 +33,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Compile
+      - name: Build and Check
         run: ./gradlew build --no-daemon
 
       - name: Code coverage report decoration
