@@ -2,7 +2,7 @@ services:
 
   postgres:
     container_name: replaceme-postgres
-    image: postgres:13.0-alpine
+    image: postgres:18.0-alpine
     restart: always
     environment:
       POSTGRES_PASSWORD: password2
@@ -10,6 +10,12 @@ services:
       POSTGRES_DB: replaceme
     ports:
       - "5432:5432"
+
+  redis:
+    container_name: replaceme-redis
+    image: redis:8.2.1
+    ports:
+      - "9989:6379"
 
 volumes:
   replaceme-postgres-data:

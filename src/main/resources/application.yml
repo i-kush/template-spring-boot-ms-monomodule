@@ -1,19 +1,50 @@
+server:
+  port: 8080
+  http2:
+    enabled: true
+
 spring:
-  profiles:
-    active: local
+  application:
+    name: replace-me-be-app
+  threads:
+    virtual:
+      enabled: true
+
+  data:
+    redis:
+      repositories:
+        enabled: false
+      ttl: 3 # hours
   jpa:
     open-in-view: false
-  mvc:
-    servlet:
-      path: /api
+  liquibase:
+    change-log: classpath:/db.changelog/changelog-master.xml
 
 management:
+  server:
+    port: 8081
+  observations:
+    annotations:
+      enabled: true
   endpoints:
     web:
-      base-path: /actuator
       exposure:
-        include: '*'
+        include: health,metrics
   endpoint:
     health:
-      show-details: always
-      show-components: always
+      show-details: ALWAYS
+  metrics:
+    tags:
+      app: ${spring.application.name}
+
+logging:
+  level:
+    com.kush.replaceme: INFO
+    org.springframework.data.convert.CustomConversions: ERROR
+
+replaceme:
+  executor:
+    async:
+      core-size: 20
+      max-size: 40
+      queue-capacity: 200

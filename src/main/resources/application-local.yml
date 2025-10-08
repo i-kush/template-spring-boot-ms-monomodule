@@ -1,4 +1,11 @@
+logging:
+  config: classpath:logback-spring-local.xml
+
 spring:
+  data:
+    redis:
+      host: localhost
+      port: 9989
   datasource:
     url: jdbc:postgresql://localhost:5432/replaceme
     username: postgres

@@ -1,8 +1,8 @@
 package com.kush.replaceme.service;
 
-import com.kush.replaceme.BaseTest;
 import com.kush.replaceme.exception.NotFoundException;
 import com.kush.replaceme.repository.ReplaceMeRepository;
+import com.kush.replaceme.BaseTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.Optional;
+import java.util.UUID;
 
 class ReplaceMeServiceTest extends BaseTest {
 
@@ -22,11 +23,11 @@ class ReplaceMeServiceTest extends BaseTest {
 
     @Test
     void whenReplaceMeIsNotNotFoundByIdThenErrorShouldBeThrown() {
-        Mockito.when(replaceMeRepository.findById(ArgumentMatchers.anyLong())).thenReturn(Optional.empty());
+        Mockito.when(replaceMeRepository.findById(ArgumentMatchers.any(UUID.class))).thenReturn(Optional.empty());
 
         Assertions.assertThrows(
                 NotFoundException.class,
-                () -> replaceMeService.findReplaceMeById(1),
+                () -> replaceMeService.findReplaceMeById(UUID.randomUUID()),
                 "When no info in DB then exception should be thrown"
         );
     }

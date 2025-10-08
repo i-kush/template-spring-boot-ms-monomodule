@@ -1,10 +1,12 @@
 package com.kush.replaceme.controller;
 
-import com.kush.replaceme.dto.request.CreateReplaceMeDto;
-import com.kush.replaceme.dto.response.GetReplaceMeDto;
+import com.kush.replaceme.dto.request.CreateReplaceMeRequestDto;
+import com.kush.replaceme.dto.response.ReplaceMeResponseDto;
 import com.kush.replaceme.service.ReplaceMeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/me")
+@RequestMapping("api/replaceme")
 @RequiredArgsConstructor
 public class ReplaceMeController {
 
@@ -24,12 +26,12 @@ public class ReplaceMeController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public GetReplaceMeDto createReplaceMe(@Valid @RequestBody CreateReplaceMeDto createReplaceMeDto) {
+    public ReplaceMeResponseDto createReplaceMe(@Valid @RequestBody CreateReplaceMeRequestDto createReplaceMeDto) {
         return replaceMeService.createReplaceMe(createReplaceMeDto);
     }
 
     @GetMapping("{id}")
-    public GetReplaceMeDto createReplaceMe(@PathVariable(name = "id") long id) {
+    public ReplaceMeResponseDto createReplaceMe(@PathVariable(name = "id") UUID id) {
         return replaceMeService.findReplaceMeById(id);
     }
 }

@@ -1,0 +1,7 @@
+FROM azul/zulu-openjdk-alpine:25-jre-headless-latest
+
+WORKDIR /app
+COPY ./build/libs/replaceme-*-SNAPSHOT.jar ./app.jar
+
+EXPOSE 8080
+CMD ["java", "-XX:+ExitOnOutOfMemoryError", "-jar", "app.jar"]

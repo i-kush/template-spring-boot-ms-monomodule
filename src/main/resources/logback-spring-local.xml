@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+
+    <appender name="REPLACEME_CONSOLE"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %date %highlight(%-5level) [%20.20thread] %cyan(%-40.40logger{40}) %magenta([%X{traceId}-%X{spanId}]) %magenta([%X{userId}]) - %msg%n%throwable)
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="REPLACEME_CONSOLE"/>
+    </root>
+
+</configuration>

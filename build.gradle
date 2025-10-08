@@ -1,14 +1,22 @@
+import com.github.spotbugs.snom.Confidence
+import com.github.spotbugs.snom.Effort
+import com.github.spotbugs.snom.SpotBugsTask
+
 plugins {
     id "java"
-    id "org.springframework.boot" version "3.4.5"
+    id "org.springframework.boot" version "3.5.6"
     id "io.spring.dependency-management" version "1.1.7"
+    id "com.github.spotbugs" version "6.4.2"
+    id "checkstyle"
+    id "pmd"
+    id "jacoco"
 }
 
-group = "com.kush"
+group = "com.kush.todo"
 version = "0.0.1-SNAPSHOT"
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -16,64 +24,131 @@ repositories {
     mavenCentral()
 }
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+ext {
+    mapStructVersion = "1.6.3"
+    springDocVersion = "2.8.13"
+    logstashVersion = "8.1"
+    archUnitVersion = "1.4.1"
 }
 
 dependencies {
     implementation "org.springframework.boot:spring-boot-starter-actuator"
-    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-starter-data-jdbc"
+    implementation "org.springframework.boot:spring-boot-starter-data-redis"
+    implementation "org.springframework.kafka:spring-kafka"
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation "org.springframework.boot:spring-boot-starter-web"
-    implementation "org.flywaydb:flyway-core"
-    implementation "org.flywaydb:flyway-database-postgresql"
+    implementation "org.springframework.boot:spring-boot-starter-aop"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springDocVersion}"
+    //To fix CVE-2025-48924 from 'org.springdoc:springdoc-openapi-starter-webmvc-ui'
+    implementation "org.apache.commons:commons-lang3:3.19.0"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    implementation "org.liquibase:liquibase-core"
     implementation "org.postgresql:postgresql"
-    implementation "org.mapstruct:mapstruct:1.6.3"
+    implementation "org.mapstruct:mapstruct:${mapStructVersion}"
+    implementation "net.logstash.logback:logstash-logback-encoder:${logstashVersion}"
+    implementation "io.micrometer:micrometer-tracing-bridge-otel"
+    implementation "io.opentelemetry:opentelemetry-context"
 
     compileOnly "org.projectlombok:lombok"
     annotationProcessor "org.projectlombok:lombok"
-    annotationProcessor "org.mapstruct:mapstruct-processor:1.6.3"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapStructVersion}"
 
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.boot:spring-boot-testcontainers"
+    testImplementation "org.testcontainers:kafka"
+    testImplementation "com.redis:testcontainers-redis"
     testImplementation "org.testcontainers:junit-jupiter"
     testImplementation "org.testcontainers:postgresql"
+    testImplementation "com.tngtech.archunit:archunit-junit5:${archUnitVersion}"
 
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 tasks.named("test") {
+    jvmArgs "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('mockito-core') }}", '-Xshare:off'
     useJUnitPlatform()
 }
 
-sourceSets {
-    integration {
-        java.srcDir "$projectDir/src/integration/java"
-        resources.srcDir "$projectDir/src/integration/resources"
-        compileClasspath += main.output + test.output
-        runtimeClasspath += main.output + test.output
+tasks.named("jacocoTestReport") {
+    dependsOn test
+    executionData fileTree(project.rootDir.absolutePath).include(
+            "**/build/jacoco/test.exec"
+    )
+
+    classDirectories.setFrom(
+            fileTree(dir: layout.buildDirectory.dir("classes/java/main").get().asFile, excludes: [
+                    "com/kush/replaceme/dto/**",
+                    "com/kush/replaceme/entity/**",
+                    "com/kush/replaceme/mapper/**",
+                    "com/kush/replaceme/constant/**",
+                    "com/kush/replaceme/exception/**",
+                    "com/kush/replaceme/config/**",
+                    "com/kush/replaceme/ReplaceMeApplication.class"
+            ])
+    )
+
+    reports {
+        xml.required = true
+        html.required = true
     }
 }
 
-configurations {
-    integrationImplementation.extendsFrom testImplementation
-    integrationRuntime.extendsFrom testRuntime
+checkstyle {
+    toolVersion = "11.0.1"
+    configFile = file("config/checkstyle-rules.xml")
+    ignoreFailures = false
 }
 
-tasks.register("integrationTest", Test) {
-    useJUnitPlatform()
-
-    testClassesDirs = sourceSets.integration.output.classesDirs
-    classpath = sourceSets.integration.runtimeClasspath
+pmd {
+    toolVersion = "7.17.0"
+    ruleSets = []
+    ruleSetFiles = files("config/pmd-rules.xml")
+    ignoreFailures = false
 }
 
-rootProject.tasks.named("processIntegrationResources") {
-    duplicatesStrategy = "include"
+spotbugs {
+    toolVersion = "4.9.4"
+    effort = Effort.MAX
+    reportLevel = Confidence.valueOf("LOW") //A workaround to overcome build warning to to plugin issues
+    ignoreFailures = false
+    excludeFilter = file("config/spotbugs-exclusions.xml")
 }
 
-if (System.properties["test.profile"] == "integration") {
-    check.dependsOn integrationTest
-    integrationTest.mustRunAfter test
+tasks.withType(Checkstyle).configureEach {
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+tasks.withType(Pmd).configureEach {
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+tasks.withType(SpotBugsTask).configureEach {
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += [
+            "-Amapstruct.defaultComponentModel=spring",
+            "-Werror",
+            "-Amapstruct.unmappedTargetPolicy=ERROR"
+    ]
+}
+
+tasks.named("check") {
+    dependsOn tasks.named("spotbugsMain")
+    dependsOn tasks.named("spotbugsTest")
+    dependsOn tasks.named("checkstyleMain")
+    dependsOn tasks.named("checkstyleTest")
+    dependsOn tasks.named("pmdMain")
+    dependsOn tasks.named("pmdTest")
 }

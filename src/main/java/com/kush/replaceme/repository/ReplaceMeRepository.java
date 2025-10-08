@@ -1,9 +1,11 @@
 package com.kush.replaceme.repository;
 
-import com.kush.replaceme.entity.ReplaceMeEntity;
+import com.kush.replaceme.entity.ReplaceMe;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.UUID;
 
-public interface ReplaceMeRepository extends JpaRepository<ReplaceMeEntity, Long> {
+import org.springframework.data.repository.CrudRepository;
+
+public interface ReplaceMeRepository extends CrudRepository<ReplaceMe, UUID> {
 
 }
