@@ -59,6 +59,7 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.data.redis.port", REDIS::getRedisPort);
     }
 
+
     @PreDestroy
     public static void tearDown() {
         DB.stop();
