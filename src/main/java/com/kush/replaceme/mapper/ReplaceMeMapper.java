@@ -1,16 +1,16 @@
 package com.kush.replaceme.mapper;
 
-import com.kush.replaceme.dto.request.CreateReplaceMeDto;
-import com.kush.replaceme.dto.response.GetReplaceMeDto;
-import com.kush.replaceme.entity.ReplaceMeEntity;
+import com.kush.replaceme.dto.request.CreateReplaceMeRequestDto;
+import com.kush.replaceme.dto.response.ReplaceMeResponseDto;
+import com.kush.replaceme.entity.ReplaceMe;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public abstract class ReplaceMeMapper {
 
     @Mapping(target = "id", ignore = true)
-    public abstract ReplaceMeEntity toReplaceMeEntity(CreateReplaceMeDto createReplaceMeDto);
+    public abstract ReplaceMe toReplaceMeEntity(CreateReplaceMeRequestDto createReplaceMeDto);
 
-    public abstract GetReplaceMeDto toGetReplaceMeDto(ReplaceMeEntity replaceMeEntity);
+    public abstract ReplaceMeResponseDto toGetReplaceMeDto(ReplaceMe replaceMeEntity);
 }

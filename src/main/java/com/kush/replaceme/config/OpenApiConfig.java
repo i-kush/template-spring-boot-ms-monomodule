@@ -1,0 +1,33 @@
+package com.kush.replaceme.config;
+
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.HeaderParameter;
+import org.springdoc.core.models.GroupedOpenApi;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+
+@Configuration
+public class OpenApiConfig {
+
+    @Bean
+    public GroupedOpenApi customGroupedOpenApi() {
+        return GroupedOpenApi.builder()
+                             .group("replace-me-app")
+                             .displayName("ReplaceMe App OpenAPI")
+                             .addOperationCustomizer((operation, handlerMethod) -> {
+                                 addGlobalRequestHeaders(operation);
+                                 return operation;
+                             })
+                             .build();
+    }
+
+    private void addGlobalRequestHeaders(Operation operation) {
+        operation.addParametersItem(new HeaderParameter().name(HttpHeaders.AUTHORIZATION)
+                                                         .description("Authorization JWT data")
+                                                         .schema(new StringSchema())
+                                                         .required(true));
+    }
+}

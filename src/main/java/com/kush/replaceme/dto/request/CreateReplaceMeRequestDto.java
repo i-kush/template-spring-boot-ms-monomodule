@@ -2,9 +2,11 @@ package com.kush.replaceme.dto.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
-public record CreateReplaceMeDto(
-        @NotEmpty @Size(max = 20) String name
+@Builder
+public record CreateReplaceMeRequestDto(
+        @NotEmpty @Size(max = 80) String name
 ) {
 
 }

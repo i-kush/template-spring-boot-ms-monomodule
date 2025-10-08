@@ -1,0 +1,1 @@
+truncate replace_me;
